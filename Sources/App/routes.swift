@@ -1,6 +1,11 @@
 import Vapor
 
 func routes(_ app: Application) throws {
+    
+    
+    // 通过controller注册
+    try app.register(collection: TodosController())
+    
     app.get { req in
         return "It works!"
     }
@@ -40,22 +45,23 @@ func routes(_ app: Application) throws {
     }
     
     // 数据流
-    app.on(.POST, "file-upload", body: .stream) { req in
+    app.on(.POST, "file-upload", body: .stream) { req -> String in
         // 处理数据流业务
+        return "数据"
     }
     
     /*
      路由组
      */
     let users = app.grouped("users")
-    users.get {req in
-        
+    users.get {req -> String in
+        return "get"
     }
-    users.post {req in
-        
+    users.post {req -> String in
+        return "post"
     }
     
-    users.get(":id") { req in
+    users.get(":id") { req -> String in
         let id = req.parameters.get("id")!
         return "路由组处理业务\(id)"
     }
@@ -65,7 +71,13 @@ func routes(_ app: Application) throws {
      */
     app.group("names") {names in
         names.get(":id") { req in
-            return "路由组-闭包处理\(req.parameters.get("id"))"
+            return "路由组-闭包处理\(req.parameters.get("id")!)"
         }
+    }
+    
+    app.get("greeting") { req -> HTTPStatus in
+        let greeting = try req.content.decode(Greeting.self)
+        print(greeting.hello)
+        return HTTPStatus.ok
     }
 }
